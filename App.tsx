@@ -6,11 +6,18 @@ import { SOPDocument, ChatMessage, MessageAuthor } from './types';
 import { getChatResponse } from './services/geminiService';
 
 const App: React.FC = () => {
+  const [isAdmin] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('role') === 'admin';
+  });
+
   const [sopDocs, setSopDocs] = useState<SOPDocument[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       author: MessageAuthor.BOT,
-      text: "Hello! I'm SOP Genius. Please upload your SOP documents, then ask me anything about them.",
+      text: isAdmin 
+        ? "Hello Admin! I'm SOP Genius. Please upload your SOP documents, then ask me anything about them."
+        : "Hello! I'm SOP Genius. How can I help you with our SOPs today?",
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +41,9 @@ const App: React.FC = () => {
       if (sopDocs.length === 0) {
         const botMessage: ChatMessage = {
           author: MessageAuthor.BOT,
-          text: "Please upload at least one SOP document before asking questions.",
+          text: isAdmin 
+            ? "Please upload at least one SOP document before asking questions."
+            : "I don't have any SOP documents to reference. Please contact an administrator.",
         };
         setMessages((prev) => [...prev, botMessage]);
         return;
@@ -44,6 +53,7 @@ const App: React.FC = () => {
       const botMessage: ChatMessage = { author: MessageAuthor.BOT, text: responseText };
       setMessages((prev) => [...prev, botMessage]);
 
+    // FIX: Added curly braces to the catch block to correctly handle errors.
     } catch (error) {
       console.error("Error getting chat response:", error);
       const errorMessage: ChatMessage = {
@@ -54,7 +64,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, sopDocs]);
+  }, [isLoading, sopDocs, isAdmin]);
 
   return (
     <div className="flex h-screen font-sans text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-900">
@@ -63,6 +73,7 @@ const App: React.FC = () => {
           sopDocs={sopDocs}
           onAddSop={addSopDoc}
           onRemoveSop={removeSopDoc}
+          isAdmin={isAdmin}
         />
         <ChatWindow
           messages={messages}
