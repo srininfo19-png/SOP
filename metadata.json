@@ -1,0 +1,7 @@
+{
+  "name": "Copy of SOP Genius Chat",
+  "description": "An intelligent chatbot to answer questions based on your organization's Standard Operating Procedure (SOP) documents. Supports text and voice interactions with text-to-speech replies.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
